@@ -52,7 +52,6 @@ else if (argv._.includes('pods')) {
 
 
 function showPods(pods, info) {
-    console.log("Pods fetched: {}", pods.listMeta.totalItems);
     console.log("Name\tRestarts\tStatus\tCreatedTime\tVersion");
 
     for (var pod of pods) {
@@ -94,7 +93,7 @@ async function fetchPods(namespace) {
 
             executeHttp(uri)
             .then( (pods) => {
-                resolve(pods);
+                resolve(pods.pods);
             })
             .catch( (err) => {
                 // Manage error pls, for now, only logging
