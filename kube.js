@@ -12,9 +12,9 @@ const argv = require('yargs')
     })
 
     .command('pods', 'Shows the list of pods for the namespace', {
-    	branch: {
-    		description: 'Show the branch for each pod',
-    		alias: 'b',
+    	info: {
+    		description: 'Show more info for each pod',
+    		alias: 'i',
     		type: 'boolean'
     	}
     })
@@ -38,10 +38,41 @@ if (argv._.includes('tail')) {
 	//tailPod(argv.pod, argv.namespace);
 }
 else if (argv._.includes('pods')) {
-	var pods = fetchPods(argv.namespace);
-	//showPods(pods, argv.branch);
+	fetchPods(argv.namespace)
+    .then( (pods) => {
+        showPods(pods, argv.info);
+    })
+    .catch( (err) => {
+        // Manage error pls, for now, only logging
+        console.log(err);
+    });
 }
 
+
+
+function showPods(pods, info) {
+    console.log("Pods fetched: {}", pods.listMeta.totalItems);
+    console.log("Name\tRestarts\tStatus\tCreatedTime\tVersion");
+    for (var pod of pods) {
+        var objectMeta = pod.objectMeta;
+        if (info) {
+            console.log("{}\t{}\t{}\t{}\t{}"
+                , objectMeta.name
+                , pod.restartCount
+                , pod.podStatus.podPhase
+                , objectMeta.creationTimestamp
+                , objectMeta.labels.version
+                ); 
+
+        } else {
+            console.log("{}\t{}\t{}"
+                , objectMeta.name
+                , pod.restartCount
+                , pod.podStatus.podPhase 
+                );
+        }
+    }
+}
 
 
 async function tailPod(fPod, namespace) {
@@ -56,16 +87,17 @@ async function fetchPods(namespace) {
 
 	var parameters = new Map();
 	parameters.set('{namespace}', namespace);
+    var uri = replaceParametersURI(OPTIONS.URI_PODS, parameters);
 
-	var uri = replaceParametersURI(OPTIONS.URI_PODS, parameters);
 
-	try {
-	var pods = await executeHttp(uri);
-	console.log(pods);
-	} catch(er){
-		console.log("Timeout ERROR D:");
-	}
-	return pods;
+    return new Promise(function (resolve, reject)) {
+        try {
+            var pods = await executeHttp(uri);
+            resolve(pods);
+        } catch(er){
+            reject(er);
+        }
+    }
 }
 
 
