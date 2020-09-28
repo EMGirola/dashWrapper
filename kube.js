@@ -53,26 +53,35 @@ else if (argv._.includes('pods')) {
 
 function showPods(pods, info) {
     console.log("Name\tRestarts\tStatus\tCreatedTime\tVersion");
+    var tPod = [];
 
     for (var pod of pods) {
         var objectMeta = pod.objectMeta;
         if (info) {
-            console.log(
-                objectMeta.name, "\t"
-                , pod.restartCount, "\t"
-                , pod.podStatus.podPhase, "\t"
-                , objectMeta.creationTimestamp, "\t"
-                , objectMeta.labels.version
-                ); 
+            tPod.push(
+                {
+                    'Name': objectMeta.name,
+                    'Restarts': pod.restartCount,
+                    'Status': pod.podStatus.podPhase,
+                    'CreatedTime': objectMeta.creationTimestamp,
+                    'Version': objectMeta.labels.version
+                }
+            );
 
         } else {
-            console.log(
-                objectMeta.name, "\t"
-                , pod.restartCount, "\t"
-                , pod.podStatus.podPhase 
-                );
+
+            tPod.push(
+                {
+                    'Name': objectMeta.name,
+                    'Restarts': pod.restartCount,
+                    'Status': pod.podStatus.podPhase
+                }
+            );
         }
     }
+
+    console.table(tPod);
+
 }
 
 
