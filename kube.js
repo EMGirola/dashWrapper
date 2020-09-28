@@ -22,6 +22,7 @@ const argv = require('yargs')
     	alias: 'n',
     	type: 'string'
     })
+    .demandCommand(1, 'You need at least one command to continue')
     .demandOption(['namespace'], 'Please provide namespace to work with this tool')
     .help()
     .alias('help', 'h')
@@ -53,6 +54,7 @@ else if (argv._.includes('pods')) {
 function showPods(pods, info) {
     console.log("Pods fetched: {}", pods.listMeta.totalItems);
     console.log("Name\tRestarts\tStatus\tCreatedTime\tVersion");
+
     for (var pod of pods) {
         var objectMeta = pod.objectMeta;
         if (info) {
@@ -76,10 +78,8 @@ function showPods(pods, info) {
 
 
 async function tailPod(fPod, namespace) {
-	var pods = fetchPods(false, namespace);
+	var pods = await fetchPods(namespace);
 	var pod = findPodByName(pods, fPod);
-
-
 }
 
 
@@ -90,14 +90,17 @@ async function fetchPods(namespace) {
     var uri = replaceParametersURI(OPTIONS.URI_PODS, parameters);
 
 
-    return new Promise(function (resolve, reject)) {
-        try {
-            var pods = await executeHttp(uri);
-            resolve(pods);
-        } catch(er){
-            reject(er);
-        }
-    }
+    return new Promise(function (resolve, reject) {
+
+            executeHttp(uri)
+            .then( (pods) => {
+                resolve(pods);
+            })
+            .catch( (err) => {
+                // Manage error pls, for now, only logging
+                reject(err);
+            });
+    });
 }
 
 
@@ -109,7 +112,6 @@ async function executeHttp(uri) {
 
         REQUEST(OPTIONS.hostname + '/' + uri, { json: true }, (err, res, body) => {
         if (err) { 
-            console.log(err);
             reject(err); 
         }
             resolve(body);
