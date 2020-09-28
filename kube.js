@@ -57,18 +57,18 @@ function showPods(pods, info) {
     for (var pod of pods) {
         var objectMeta = pod.objectMeta;
         if (info) {
-            console.log("{}\t{}\t{}\t{}\t{}"
-                , objectMeta.name
-                , pod.restartCount
-                , pod.podStatus.podPhase
-                , objectMeta.creationTimestamp
+            console.log(
+                objectMeta.name, "\t"
+                , pod.restartCount, "\t"
+                , pod.podStatus.podPhase, "\t"
+                , objectMeta.creationTimestamp, "\t"
                 , objectMeta.labels.version
                 ); 
 
         } else {
-            console.log("{}\t{}\t{}"
-                , objectMeta.name
-                , pod.restartCount
+            console.log(
+                objectMeta.name, "\t"
+                , pod.restartCount, "\t"
                 , pod.podStatus.podPhase 
                 );
         }
